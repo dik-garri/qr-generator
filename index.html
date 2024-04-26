@@ -8,12 +8,22 @@
     </head>
     <body>
         <h1>URL to QR Code Generator</h1>
+        <label for="urlInput">QR URL:</label>
         <input type="text" id="urlInput" placeholder="Enter URL here" />
+        <br />
+        <br />
+        <label for="sizeInput">Size:</label>
         <input
             type="number"
             id="sizeInput"
             placeholder="Enter size (e.g., 256, 512, etc.)"
         />
+        <br />
+        <br />
+        <label for="logoFileInput">Logo File:</label>
+        <input type="file" id="logoFileInput" accept="image/*" />
+        <br />
+        <br />
         <button onclick="generateQRCode()">Generate QR Code</button>
         <br />
         <div id="qrcode" style="margin-top: 20px"></div>
@@ -21,11 +31,13 @@
         <button onclick="downloadQR()">Download QR Code</button>
 
         <script>
+
             function generateQRCode() {
                 var url = document.getElementById("urlInput").value;
                 var size =
-                    parseInt(document.getElementById("sizeInput").value) || 256; // Default size is 512 if no input
+                    parseInt(document.getElementById("sizeInput").value) || 512; // Default size is 512 if no input
                 document.getElementById("qrcode").innerHTML = "";
+
                 var qr = new QRCode(document.getElementById("qrcode"), {
                     text: url,
                     width: size,
@@ -34,6 +46,44 @@
                     colorLight: "#ffffff",
                     correctLevel: QRCode.CorrectLevel.H,
                 });
+
+                var logoFileInput = document.getElementById("logoFileInput");
+                if (logoFileInput.files && logoFileInput.files[0]) {
+                    var reader = new FileReader();
+                    reader.onload = function (e) {
+                        var img = new Image();
+                        img.onload = function () {
+                            setTimeout(() => {
+                                var qrCanvas =
+                                    document.querySelector("#qrcode canvas");
+                                var context = qrCanvas.getContext("2d");
+                                var imageSize = size * 0.2; // Logo size is 20% of the QR code size
+                                var imagePosition = (size - imageSize) / 2; // Center the logo
+
+                                // Draw white frame
+                                var frameThickness = 10; // Adjust thickness of the frame
+                                context.fillStyle = "#ffffff";
+                                context.fillRect(
+                                    imagePosition - frameThickness,
+                                    imagePosition - frameThickness,
+                                    imageSize + 2 * frameThickness,
+                                    imageSize + 2 * frameThickness
+                                );
+
+                                // Draw the logo image
+                                context.drawImage(
+                                    img,
+                                    imagePosition,
+                                    imagePosition,
+                                    imageSize,
+                                    imageSize
+                                );
+                            }, 50); // Delay to ensure QR code canvas is fully rendered
+                        };
+                        img.src = e.target.result; // Set image source to data URL
+                    };
+                    reader.readAsDataURL(logoFileInput.files[0]);
+                }
             }
 
             function downloadQR() {
