@@ -9,7 +9,11 @@
     <body>
         <h1>URL to QR Code Generator</h1>
         <input type="text" id="urlInput" placeholder="Enter URL here" />
-        <input type="number" id="sizeInput" placeholder="Enter size (e.g., 256, 512, etc.)">
+        <input
+            type="number"
+            id="sizeInput"
+            placeholder="Enter size (e.g., 256, 512, etc.)"
+        />
         <button onclick="generateQRCode()">Generate QR Code</button>
         <br />
         <div id="qrcode" style="margin-top: 20px"></div>
@@ -34,7 +38,23 @@
 
             function downloadQR() {
                 var qrCanvas = document.querySelector("#qrcode canvas");
-                var image = qrCanvas
+                var padding = 20; // Set padding size
+                var canvas = document.createElement("canvas");
+                var context = canvas.getContext("2d");
+
+                // Set dimensions for the new canvas
+                canvas.width = qrCanvas.width + 2 * padding;
+                canvas.height = qrCanvas.height + 2 * padding;
+
+                // Fill the new canvas with white background
+                context.fillStyle = "#ffffff";
+                context.fillRect(0, 0, canvas.width, canvas.height);
+
+                // Draw the original QR code canvas onto the new canvas with padding
+                context.drawImage(qrCanvas, padding, padding);
+
+                // Convert to data URL and trigger download
+                var image = canvas
                     .toDataURL("image/png")
                     .replace("image/png", "image/octet-stream");
                 var link = document.createElement("a");
